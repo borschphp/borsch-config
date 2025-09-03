@@ -1,0 +1,9 @@
+host: - localhost -error
+- generate an error by adding invalid characters
+port: 8080
+useSSL: false
+database:
+  type: mysql
+  username: root
+  password: password
+  name: test_db

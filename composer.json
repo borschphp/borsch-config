@@ -1,0 +1,37 @@
+{
+  "name": "borschphp/config",
+  "description": "A minimal configuration manager.",
+  "license": "MIT",
+  "keywords": ["configuration", "config", "settings", "borschphp"],
+  "authors": [
+    {
+      "name": "Alexandre Debusschère",
+      "email": "alexandre@kosmonaft.dev"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Borsch\\Config\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": "^8.3",
+    "psr/container": "^2.0",
+    "symfony/yaml": "^7.3",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^2.1",
+    "pestphp/pest": "^4.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}

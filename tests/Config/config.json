@@ -1,0 +1,11 @@
+{
+  "host": "localhost",
+  "port": 8080,
+  "useSSL": false,
+  "database": {
+    "type": "mysql",
+    "username": "root",
+    "password": "password",
+    "name": "test_db"
+  }
+}
