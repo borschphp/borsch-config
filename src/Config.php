@@ -3,9 +3,7 @@
 namespace Borsch\Config;
 
 use Borsch\Config\Exception\NotFoundException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use Psr\Container\{ContainerExceptionInterface, ContainerInterface, NotFoundExceptionInterface};
 
 class Config implements ContainerInterface
 {

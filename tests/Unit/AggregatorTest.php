@@ -2,24 +2,20 @@
 
 use Borsch\Config\Aggregator;
 use Borsch\Config\Config;
+use Borsch\Config\Exception\AggregatorException;
+use Tests\Config\MyConfigProvider;
 
 covers(Aggregator::class);
 
-beforeEach(function () {
-    // Clean up cache file before each test
+function test_remove_cache_files(): void
+{
     $cacheFile = __DIR__ . '/../Config/cache.config.php';
-    if (file_exists($cacheFile)) {
-        unlink($cacheFile);
-    }
-});
+    file_exists($cacheFile) && unlink($cacheFile);
+}
 
-afterAll(function () {
-    // Clean up cache file before each test
-    $cacheFile = __DIR__ . '/../Config/cache.config.php';
-    if (file_exists($cacheFile)) {
-        unlink($cacheFile);
-    }
-});
+// Clean up cache file before and after each test
+beforeEach(fn() => test_remove_cache_files());
+afterAll(fn() => test_remove_cache_files());
 
 test('getMergedConfig() returns merged configuration from multiple sources', function () {
     $iniData = ['APP_URL' => 'http://localhost', 'DB_HOST' => 'localhost',];
@@ -34,6 +30,36 @@ test('getMergedConfig() returns merged configuration from multiple sources', fun
         ->and($config->get('DB_HOST'))->toBe('localhost')
         ->and($config->get('DB_PORT'))->toBe('5432');
 });
+
+test('getMergedConfig() returns merged configuration from provider classes FQDN', function () {
+    $aggregator = new Aggregator([
+        MyConfigProvider::class
+    ]);
+    $config = $aggregator->getMergedConfig();
+
+    expect($config)->toBeInstanceOf(Config::class)
+        ->and($config->get('MCP-key'))->toBe('value from MyConfigProvider');
+});
+
+test('getMergedConfig() returns merged configuration from instantiated provider classes', function () {
+    $aggregator = new Aggregator([
+        new MyConfigProvider()
+    ]);
+    $config = $aggregator->getMergedConfig();
+
+    expect($config)->toBeInstanceOf(Config::class)
+        ->and($config->get('MCP-key'))->toBe('value from MyConfigProvider');
+});
+
+test('getMergedConfig() throws exception on invalid provider', function () {
+    $aggregator = new Aggregator([
+        'NonExistentClass',
+    ]);
+    $aggregator->getMergedConfig();
+})->throws(
+    AggregatorException::class,
+    'Invalid config provider of type "string", must be array, invokable object or class name.'
+);
 
 test('getMergedConfig() creates cache file', function () {
     $iniData = ['APP_URL' => 'http://localhost', 'DB_HOST' => 'localhost',];
