@@ -43,7 +43,7 @@ jobs:
         run:  ./vendor/bin/pest tests
 
       - name: Run mutation tests
-        run: XDEBUG_MODE=coverage ./vendor/bin/pest tests --mutate --min=70
+        run: XDEBUG_MODE=coverage ./vendor/bin/pest tests --mutate --min=70 --covered-only
 
       - name: Run PHPStan analysis
         run: ./vendor/bin/phpstan analyse src

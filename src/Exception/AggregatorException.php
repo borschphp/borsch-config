@@ -11,7 +11,7 @@ class AggregatorException extends Exception
     {
         $type = gettype($provider);
         if ($type === 'object') {
-            $type = get_class($provider);
+            $type = get_class((object)$provider);
         }
 
         return new self("Invalid config provider of type \"{$type}\", must be array, invokable object or class name.");

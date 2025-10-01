@@ -33,7 +33,7 @@ class Aggregator
     }
 
     /**
-     * @param array<array<string, mixed>> $configs
+     * @param array<array<string, mixed>|class-string|object> $configs
      * @throws AggregatorException
      */
     private function loadConfigs(array $configs): void
@@ -41,11 +41,18 @@ class Aggregator
         foreach ($configs as $provider) {
             $config = match (true) {
                 is_array($provider) => $provider,
-                is_string($provider) && class_exists($provider) => (new $provider())(),
+                is_string($provider) && class_exists($provider) => (function() use ($provider) {
+                    $instance = new $provider();
+                    if (!method_exists($instance, '__invoke')) {
+                        throw AggregatorException::invalidConfigProvider($provider);
+                    }
+                    return $instance();
+                })(),
                 is_object($provider) && method_exists($provider, '__invoke') => ($provider)(),
                 default => throw AggregatorException::invalidConfigProvider($provider)
             };
 
+            /** @var array<string, mixed> $config */
             $this->conf = array_merge($this->conf, $config);
         }
     }
