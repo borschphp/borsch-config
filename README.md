@@ -51,7 +51,7 @@ $key = $config->has('key') ? $config->get('key') : 'other_value';
 $other = $config->getOrDefault('other', 'default_value');
 ```
 
-A more complete example with multiple readers and caching :
+A more complete example with multiple readers :
 
 ```php
 <?php
@@ -86,6 +86,57 @@ $aggregator = new Aggregator(
         [
             'key' => 'value'
         ]
+    ]
+);
+
+/** @var Config $config */
+$config = $aggregator->getMergedConfig();
+
+$key = $config->has('key') ? $config->get('key') : 'other_value';
+$other = $config->getOrDefault('other', 'default_value');
+```
+
+## Providers
+
+Providers allow you to specify file paths, internally it uses the `glob()` function to find matching files so you can use
+`glob()` patterns.
+Because the providers are callable, configuration loading can be deferred until actually needed, this is the recommended
+way to build your configuration in order to avoid unnecessary file parsing **in production**.
+
+There is no interface for providers, they just need to be classes implementing the `__invoke()` method and returning an
+array.  
+Therefore, it is possible to only provide the provider FQDN if there is no constructor arguments. Example :
+
+```php
+$aggregator = new Aggregator(
+    [
+        Application\Config\MyConfigProvider::class
+    ]
+);
+```
+
+A complete example with **providers** and **caching enabled** :
+
+```php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Borsch\Config\Aggregator;
+use Borsch\Config\Config;
+use Borsch\Config\Provider\DotEnvProvider;
+use Borsch\Config\Provider\IniProvider;
+use Borsch\Config\Provider\JsonProvider;
+use Borsch\Config\Provider\PhpFileProvider;
+use Borsch\Config\Provider\YamlProvider;
+
+$aggregator = new Aggregator(
+    [
+        new PhpFileProvider('config/production.*.config.php'),
+        new JsonProvider('config/production.*.config.json'),
+        new YamlProvider('config/production.*.config.y{a,}ml'),
+        new IniProvider('config/production.*.config.ini'),
+        new DotEnvProvider('config/.env.production.*'),
     ],
     cache_file: __DIR__.'/storage/cache/config.cache.php',
     use_cache: true

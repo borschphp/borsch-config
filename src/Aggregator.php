@@ -2,6 +2,8 @@
 
 namespace Borsch\Config;
 
+use Borsch\Config\Exception\AggregatorException;
+
 class Aggregator
 {
 
@@ -9,7 +11,8 @@ class Aggregator
     private array $conf = [];
 
     /**
-     * @param array<array<string, mixed>> $configs
+     * @param array<array<string, mixed>|class-string|object> $configs
+     * @throws AggregatorException
      */
     public function __construct(
         array $configs = [],
@@ -31,11 +34,19 @@ class Aggregator
 
     /**
      * @param array<array<string, mixed>> $configs
+     * @throws AggregatorException
      */
     private function loadConfigs(array $configs): void
     {
-        foreach ($configs as $conf) {
-            $this->conf = array_merge($this->conf, $conf);
+        foreach ($configs as $provider) {
+            $config = match (true) {
+                is_array($provider) => $provider,
+                is_string($provider) && class_exists($provider) => (new $provider())(),
+                is_object($provider) && method_exists($provider, '__invoke') => ($provider)(),
+                default => throw AggregatorException::invalidConfigProvider($provider)
+            };
+
+            $this->conf = array_merge($this->conf, $config);
         }
     }
 
@@ -53,6 +64,10 @@ class Aggregator
         return true;
     }
 
+    /**
+     * @return void
+     * @pest-mutate-ignore
+     */
     private function cacheConfigs(): void
     {
         if ($this->use_cache === false) {
