@@ -3,18 +3,21 @@
 namespace Borsch\Config;
 
 use Borsch\Config\Exception\NotFoundException;
-use Psr\Container\{ContainerExceptionInterface, ContainerInterface, NotFoundExceptionInterface};
+use Psr\Container\ContainerInterface;
+use Dflydev\DotAccessData\Data;
 
 class Config implements ContainerInterface
 {
 
+    private Data $config;
+
     /**
      * @param array<string, mixed> $config
      */
-    public function __construct(
-        /** @var array<string, mixed> */
-        private array $config = []
-    ) {}
+    public function __construct(array $config = [])
+    {
+        $this->config = new Data($config);
+    }
 
     public function get(string $id): mixed
     {
@@ -22,33 +25,23 @@ class Config implements ContainerInterface
             throw NotFoundException::forEntry($id);
         }
 
-        return $this->config[$id];
+        return $this->config->get($id);
     }
 
     public function has(string $id): bool
     {
-        return isset($this->config[$id]);
+        return $this->config->has($id);
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function getOrDefault(string $id, mixed $default = null): mixed
     {
-        if ($this->has($id)) {
-            return $this->get($id);
-        }
-
-        return $default;
+        return $this->config->get($id, $default);
     }
 
     public function merge(Config $config): Config
     {
         if ($config !== $this && !empty($config->config)) {
-            foreach ($config->config as $key => $value) {
-                $this->config[$key] = $value;
-            }
+            $this->config->importData($config->config);
         }
 
         return $this;
