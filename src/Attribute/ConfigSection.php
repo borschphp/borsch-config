@@ -6,6 +6,8 @@ use Attribute;
 use Borsch\Config\Config;
 use League\Container\Attribute\AttributeInterface;
 use League\Container\{ContainerAwareInterface, ContainerAwareTrait};
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 #[Attribute(Attribute::TARGET_PARAMETER)]
 readonly class ConfigSection implements AttributeInterface, ContainerAwareInterface
@@ -17,8 +19,15 @@ readonly class ConfigSection implements AttributeInterface, ContainerAwareInterf
         private string $section
     ) {}
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function resolve(): mixed
     {
-        return $this->getContainer()->get(Config::class)->from($this->section);
+        /** @var Config $config */
+        $config = $this->getContainer()->get(Config::class);
+
+        return $config->from($this->section);
     }
 }
