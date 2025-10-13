@@ -3,12 +3,31 @@
 namespace Borsch\Config\Attribute;
 
 use Attribute;
+use Borsch\Config\Config;
+use League\Container\Attribute\AttributeInterface;
+use League\Container\{ContainerAwareInterface, ContainerAwareTrait};
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
-#[Attribute(Attribute::TARGET_PROPERTY|Attribute::TARGET_PARAMETER)]
-readonly class ConfigSection
+#[Attribute(Attribute::TARGET_PARAMETER)]
+readonly class ConfigSection implements AttributeInterface, ContainerAwareInterface
 {
 
+    use ContainerAwareTrait;
+
     public function __construct(
-        public string $section = ''
+        private string $section
     ) {}
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function resolve(): mixed
+    {
+        /** @var Config $config */
+        $config = $this->getContainer()->get(Config::class);
+
+        return $config->from($this->section);
+    }
 }
