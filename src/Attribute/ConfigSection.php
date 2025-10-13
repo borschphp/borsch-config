@@ -6,11 +6,10 @@ use Attribute;
 use Borsch\Config\Config;
 use League\Container\Attribute\AttributeInterface;
 use League\Container\{ContainerAwareInterface, ContainerAwareTrait};
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 
 #[Attribute(Attribute::TARGET_PARAMETER)]
-readonly class ConfigSection implements AttributeInterface, ContainerAwareInterface
+class ConfigSection implements AttributeInterface, ContainerAwareInterface
 {
 
     use ContainerAwareTrait;
