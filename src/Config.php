@@ -3,7 +3,7 @@
 namespace Borsch\Config;
 
 use Borsch\Config\Exception\NotFoundException;
-use Psr\Container\ContainerInterface;
+use Psr\Container\{ContainerExceptionInterface, ContainerInterface, NotFoundExceptionInterface};
 use Dflydev\DotAccessData\Data;
 
 class Config implements ContainerInterface
@@ -45,5 +45,24 @@ class Config implements ContainerInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Create a new Config instance from an existing configuration entry.
+     *
+     * @param string $id
+     * @return Config
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function from(string $id): Config
+    {
+        $config = $this->get($id);
+        if (!is_array($config)) {
+            $config = [$config];
+        }
+
+        /** @var array<string, mixed> $config */
+        return new Config($config);
     }
 }

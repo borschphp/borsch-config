@@ -59,3 +59,23 @@ test('merge() merges two configs', function () {
     expect($config1->get('host'))->toBe('http://example.com')
         ->and($config1->get('new_key'))->toBe('new_value');
 });
+
+test('from() returns a new Config instance', function () {
+    $init = new Ini();
+    $config = new Config($init->fromFile(__DIR__.'/../Config/config.ini'));
+
+    $dbConfig = $config->from('database');
+
+    expect($dbConfig)->toBeInstanceOf(Config::class)
+        ->and($dbConfig)->not()->toBe($config)
+        ->and($dbConfig->get('username'))->toBe('admin')
+        ->and($dbConfig->get('password'))->toBe('admin')
+        ->and($dbConfig->get('database'))->toBe('mydb');
+});
+
+test('from() throws exception when entry does not exists', function () {
+    $init = new Ini();
+    $config = new Config($init->fromFile(__DIR__.'/../Config/config.ini'));
+
+    $config->from('not_exist');
+})->throws(NotFoundException::class, "Config key 'not_exist' not found.");
