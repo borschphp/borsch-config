@@ -3,12 +3,22 @@
 namespace Borsch\Config\Attribute;
 
 use Attribute;
+use Borsch\Config\Config;
+use League\Container\Attribute\AttributeInterface;
+use League\Container\{ContainerAwareInterface, ContainerAwareTrait};
 
-#[Attribute(Attribute::TARGET_PROPERTY|Attribute::TARGET_PARAMETER)]
-readonly class ConfigSection
+#[Attribute(Attribute::TARGET_PARAMETER)]
+readonly class ConfigSection implements AttributeInterface, ContainerAwareInterface
 {
 
+    use ContainerAwareTrait;
+
     public function __construct(
-        public string $section = ''
+        private string $section
     ) {}
+
+    public function resolve(): mixed
+    {
+        return $this->getContainer()->get(Config::class)->from($this->section);
+    }
 }
