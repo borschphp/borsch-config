@@ -4,12 +4,15 @@ namespace Borsch\Config;
 
 use Borsch\Config\Exception\NotFoundException;
 use Psr\Container\{ContainerExceptionInterface, ContainerInterface, NotFoundExceptionInterface};
+use CuyZ\Valinor\Mapper\MappingError;
+use CuyZ\Valinor\MapperBuilder;
 use Dflydev\DotAccessData\Data;
 
 class Config implements ContainerInterface
 {
 
     private Data $config;
+    private MapperBuilder $mapper;
 
     /**
      * @param array<string, mixed> $config
@@ -17,6 +20,7 @@ class Config implements ContainerInterface
     public function __construct(array $config = [])
     {
         $this->config = new Data($config);
+        $this->mapper = new MapperBuilder();
     }
 
     public function get(string $id): mixed
@@ -64,5 +68,24 @@ class Config implements ContainerInterface
 
         /** @var array<string, mixed> $config */
         return new Config($config);
+    }
+
+    /**
+     * Bind configuration values to an object's properties.
+     *
+     * @param string $id
+     * @param class-string|string $to
+     * @return object
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws MappingError
+     */
+    public function bind(string $id, string $to): object
+    {
+        $values = $this->get($id);
+
+        return (object)$this->mapper
+            ->mapper()
+            ->map($to, $values);
     }
 }

@@ -149,6 +149,53 @@ $key = $config->has('key') ? $config->get('key') : 'other_value';
 $other = $config->getOrDefault('other', 'default_value');
 ```
 
+## Binding Configuration to Objects
+
+The `bind()` method allows you to map a configuration array directly into a typed object. It uses
+[`cuyz/valinor`](https://github.com/CuyZ/Valinor) under the hood, which means it supports constructor injection,
+type casting, and nested objects out of the box.
+
+```php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Borsch\Config\Aggregator;
+use Borsch\Config\Config;
+use Borsch\Config\Provider\IniProvider;
+
+class DatabaseConfiguration
+{
+    private string $username;
+    private string $password;
+    private string $database;
+
+    public function getUsername(): string { return $this->username; }
+    public function setUsername(string $username): void { $this->username = $username; }
+
+    public function getPassword(): string { return $this->password; }
+    public function setPassword(string $password): void { $this->password = $password; }
+
+    public function getDatabase(): string { return $this->database; }
+    public function setDatabase(string $database): void { $this->database = $database; }
+}
+
+$aggregator = new Aggregator([
+    new IniProvider('config/config.ini'),
+]);
+
+/** @var Config $config */
+$config = $aggregator->getMergedConfig();
+
+/** @var DatabaseConfiguration $db */
+$dbConfig = $config->bind('database', DatabaseConfiguration::class);
+
+echo $dbConfig->getUsername();
+```
+
+The first argument is the configuration key to read from, and the second is the fully qualified class name to map the
+values into. The keys in the configuration array must match the property names of the target class.
+
 ## License
 
 The package is licensed under the MIT license.
