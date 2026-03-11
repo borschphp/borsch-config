@@ -3,6 +3,7 @@
 use Borsch\Config\Config;
 use Borsch\Config\Exception\NotFoundException;
 use Borsch\Config\Reader\Ini;
+use CuyZ\Valinor\Mapper\MappingError;
 
 covers(Config::class);
 
@@ -79,3 +80,51 @@ test('from() throws exception when entry does not exists', function () {
 
     $config->from('not_exist');
 })->throws(NotFoundException::class, "Config key 'not_exist' not found.");
+
+// bind()
+
+class DatabaseConfiguration
+{
+    public string $username;
+    public string $password;
+    private string $database;
+
+    public function setDatabase(string $database): void
+    {
+        $this->database = $database;
+    }
+
+    public function getDatabase(): string
+    {
+        return $this->database;
+    }
+}
+
+test('bind() maps a configuration array into an object', function () {
+    $init = new Ini();
+    $config = new Config($init->fromFile(__DIR__.'/../Config/config.ini'));
+
+    $db = $config->bind('database', DatabaseConfiguration::class);
+
+    expect($db)->toBeInstanceOf(DatabaseConfiguration::class)
+        ->and($db->username)->toBe('admin')
+        ->and($db->password)->toBe('admin')
+        ->and($db->getDatabase())->toBe('mydb');
+});
+
+test('bind() throws exception when entry does not exist', function () {
+    $init = new Ini();
+    $config = new Config($init->fromFile(__DIR__.'/../Config/config.ini'));
+
+    $config->bind('not_exist', DatabaseConfiguration::class);
+})->throws(NotFoundException::class, "Config key 'not_exist' not found.");
+
+test('bind() throws MappingError when values do not match the target class', function () {
+    $init = new Ini();
+    $config = new Config($init->fromFile(__DIR__.'/../Config/config.ini'));
+
+    // 'host' is a scalar string, not an array matching DatabaseConfiguration
+    $config->bind('host', DatabaseConfiguration::class);
+})->throws(\CuyZ\Valinor\Mapper\TypeTreeMapperError::class);
+
+
