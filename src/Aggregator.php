@@ -53,7 +53,7 @@ class Aggregator
             };
 
             /** @var array<string, mixed> $config */
-            $this->conf = array_merge($this->conf, $config);
+            $this->conf = array_merge_recursive($this->conf, $config);
         }
     }
 
