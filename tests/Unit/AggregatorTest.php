@@ -31,6 +31,18 @@ test('getMergedConfig() returns merged configuration from multiple sources', fun
         ->and($config->get('DB_PORT'))->toBe('5432');
 });
 
+test('getMergedConfig() returns merged configuration from multiple sources with same config', function () {
+    $iniData = ['database' => ['host' => 'localhost']];
+    $envData = ['database' => ['port' => 3306]];
+
+    $aggregator = new Aggregator([$iniData, $envData]);
+    $config = $aggregator->getMergedConfig();
+
+    expect($config)->toBeInstanceOf(Config::class)
+        ->and($config->get('database'))->toBeArray()
+        ->and($config->get('database'))->toMatchArray(['host' => 'localhost', 'port' => 3306]);
+});
+
 test('getMergedConfig() returns merged configuration from provider classes FQDN', function () {
     $aggregator = new Aggregator([
         MyConfigProvider::class
