@@ -52,7 +52,10 @@ class Aggregator
                 default => throw AggregatorException::invalidConfigProvider($provider)
             };
 
-            /** @var array<string, mixed> $merged */
+            /**
+             * @var array<string, mixed> $config
+             * @var array<string, mixed> $merged
+             */
             $merged = array_merge_recursive($this->conf, $config);
 
             $this->conf = $merged;
