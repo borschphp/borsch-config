@@ -56,10 +56,34 @@ class Aggregator
              * @var array<string, mixed> $config
              * @var array<string, mixed> $merged
              */
-            $merged = array_merge_recursive($this->conf, $config);
+            $merged = $this->mergeConfig($this->conf, $config);
 
             $this->conf = $merged;
         }
+    }
+
+    /**
+     * Merges two config arrays:
+     * - String keys are merged recursively (deep merge).
+     * - Integer keys are overwritten (value from $config2 wins).
+     *
+     * @param array<string, mixed> $config1
+     * @param array<string, mixed> $config2
+     * @return array<string, mixed>
+     */
+    private function mergeConfig(array $config1, array $config2): array
+    {
+        $merged = $config1;
+
+        foreach ($config2 as $key => $value) {
+            if (is_string($key) && isset($merged[$key]) && is_array($merged[$key]) && is_array($value)) {
+                $merged[$key] = $this->mergeConfig($merged[$key], $value);
+            } else {
+                $merged[$key] = $value;
+            }
+        }
+
+        return $merged;
     }
 
     private function loadFromCache(): bool

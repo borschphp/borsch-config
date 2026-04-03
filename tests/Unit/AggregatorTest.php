@@ -63,6 +63,19 @@ test('getMergedConfig() returns merged configuration from instantiated provider 
         ->and($config->get('MCP-key'))->toBe('value from MyConfigProvider');
 });
 
+test('getMergedConfig() returns config with string keys merged and integer keys overwritten', function () {
+    $iniData = ['database' => ['host' => 'localhost', 'value1']];
+    $envData = ['database' => ['port' => 3306, 'value2']];
+
+    $aggregator = new Aggregator([$iniData, $envData]);
+    $config = $aggregator->getMergedConfig();
+
+    expect($config)->toBeInstanceOf(Config::class)
+        ->and($config->get('database'))->toBeArray()
+        ->and($config->get('database'))->toMatchArray(['host' => 'localhost', 'port' => 3306])
+        ->and($config->get('database')[0])->toBe('value2');
+});
+
 test('getMergedConfig() throws exception on invalid provider', function () {
     $aggregator = new Aggregator([
         'NonExistentClass',
