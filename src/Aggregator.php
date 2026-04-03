@@ -67,9 +67,9 @@ class Aggregator
      * - String keys are merged recursively (deep merge).
      * - Integer keys are overwritten (value from $config2 wins).
      *
-     * @param array<string, mixed> $config1
-     * @param array<string, mixed> $config2
-     * @return array<string, mixed>
+     * @param array<mixed, mixed> $config1
+     * @param array<mixed, mixed> $config2
+     * @return array<mixed, mixed>
      */
     private function mergeConfig(array $config1, array $config2): array
     {
